@@ -1,10 +1,11 @@
 # Containers
 
-
 ## Cheat sheet
+
 More details in the sections after
 
 ### Basic docker container commands
+
 - `run`: creates a container
 - `ls`: lists containers
 - `inspect`: details of a container
@@ -13,8 +14,8 @@ More details in the sections after
 - `stop`: stops a container
 - `rm`: removes a container
 
-
 ### docker run argument:
+
 - `-t` : allocates pseudo TTY
 - `-i` : keep STDIN open (interactive)
 - `-d` : detached mode
@@ -111,22 +112,79 @@ estep/hogit is a process whose sole purpose is eating RAM.
   - using the `--user` option when launching it
   - or modifying it in a container process after launching it (gosu)
 
-## Basic Commands (details)
+## Basic docker container commands (details)
 
 ### ls
+
 `docker container ls`: sees all active containers
 `docker container ls -a`: sees all active and stopped containers
 `docker container ls -q`: only get short id
 
 ### inspect
+
 - detailed view of a container : `docker inspect 6a082350011d` : we get a very detailed json of the container
-- only retrieves IP :  `docker inspect --format '{{ .NetworkSettings.IPAddress }}' 6a082350011d`
--only retrieves state: `docker inspect --format '{{ json .State}}' 6a082350011d`
+- only retrieves IP : `docker inspect --format '{{ .NetworkSettings.IPAddress }}' 6a082350011d`
+  -only retrieves state: `docker inspect --format '{{ json .State}}' 6a082350011d`
 
 ### logs
+
 - See logs of container
 - `-f` to have a real time update
 - recommendation : writee logs on standard output (not on log files inside the container)
 
 - `docker container run -d --name ping alpine ping 8.8.8.8`
 - `docker container logs -f ping`
+
+### exec
+
+- Allows to launch a process in an existing container
+- often used with `-it` to have an interactive shell and do some debugging
+
+Example :
+
+- `docker container run -d --name debug alphine:3.6 sleep 10000`
+- `docker container exec -ti debug sh`
+
+Inside the container i can launch `# ps aux`
+I get
+
+```
+PID  USER  TIME  COMMAND
+  1  root  0:00  sleep 10000
+  8  root  0:00  sh
+ 15  root  0:00  ps aux
+```
+
+Note : a container is only active while the PID 1 is executing (== command specified at launch). Note that this process can not be killed easily
+
+It can work if i specify --init :
+
+- `docker container run --init -d --name debug alpine:3.6 sleep 10000`
+- then inside the container : `# kill -15 1` kills PID 1, which stops the container
+
+### stop
+
+Stops one or several containers (they still exist after being stopped and can be seen with `docker container ls -a`)
+
+- `docker container stop ID`
+- `docker container stop NAME`
+  Example to stop two containers : `docker container stop 56b856cbb4b0f5ddbddb69c10ce733f987203d4c18209038222c3946ebc5388b debug`
+
+To stop all running containers :
+
+- `docker container stop $(docker container ls -q)`
+
+### rm
+
+Removes one or several container. Note that a container must be stopped before being deleted.
+
+- `docker container rm ID`
+- `docker container rm NAME`
+
+With the `-f` flag, the container is force stopped and can then be deleted.
+
+To delete all stopped containers :
+
+- `docker container rm $(docker container ls -aq)`
+  To delete all containers (running and stopped):
+- `docker container rm -f $(docker container ls -aq)`
