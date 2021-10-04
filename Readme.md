@@ -190,10 +190,61 @@ With the `-f` flag, the container is force stopped and can then be deleted.
 To delete all stopped containers :
 
 - `docker container rm $(docker container ls -aq)`
-  To delete all containers (running and stopped):
+
+To delete all containers (running and stopped):
+
 - `docker container rm -f $(docker container ls -aq)`
 
 ### a useful command
 
 Launch a shell in a vm :
 `docker run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh`
+
+# Images
+
+## File system
+
+- An image is a file system which contains the process that will be launched in a container and all its dependencies
+- The file system is composed of several layers that are shared among images.
+- An image is a portable element.
+- They are distributed via a Registry (ex: Docker Hub)
+
+Components :
+
+- Code : (Node.js, Java,...)
+- Libraries : Dependencies (Module, Jar, Gem)
+- environment : Runtime (Node, JRE, Ruby)
+- Binaries and system libraries : OS (Ubuntu, CentOS, Alpine)
+
+The building of the image file system is in the opposite order of the above listed components. The file system of the image is the union of all these layers.
+Example of layer per component below :
+
+```
+OS ----------->   | /bin         Runtime --> | /usr/bin/node
+                  | /dev                     | /usr/bin/npm
+                  | /usr                     | /usr/lib/node_modules/npm
+                  | /var
+
+
+Dependencies -->  | /app/node_modules/express      Code --> | /app/*.js
+                  | /app/node_modules/npm
+
+```
+
+## Union filesystem
+
+- An image = graph of Read only layers
+- We use a storage / graph driver to:
+  - Unify layers in a unique filesystem
+  - add a layer in read-write linked to the container
+  - This layers allows the container to modify the file system without affecting the layers of the image
+- Different storage drivers are used depending on the situation
+- The layers are stored in /var/lib/docker in the host machine (default install)
+
+Note : for wsl, in the windows explorer go to : `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes`
+
+
+## Copy on write
+- Mechanism that occurs when a container must modify a file in an underlying layer
+- At first, the file is copied from the image read only layer to the read-write layer of the container
+- Once the file is in the read/write layer, the modification can be made and be persistent
