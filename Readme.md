@@ -99,10 +99,13 @@ estep/hogit is a process whose sole purpose is eating RAM.
 
 - To force docker to kill the process once he attains a specific level or RAM : `docker container run --memory 32m estesp/hogit`
 
+Note : set a soft limit with `--memory-reservation 16m`
+
 ### CPU :
 
 - use 4 cores `docker run -it --rm progrium/stress --cpu 4`
 - use 0.5 cores `docker run --cpus 0.5 -it --rm progrium/stress --cpu 4`
+- use only core 1 and 3 : `docker container run --cpuset-cpus 0,3 nginx`
 
 ## Ownership
 
@@ -117,6 +120,7 @@ estep/hogit is a process whose sole purpose is eating RAM.
 ### ls
 
 `docker container ls`: sees all active containers
+(old version : `docker ps`)
 `docker container ls -a`: sees all active and stopped containers
 `docker container ls -q`: only get short id
 
@@ -188,3 +192,8 @@ To delete all stopped containers :
 - `docker container rm $(docker container ls -aq)`
   To delete all containers (running and stopped):
 - `docker container rm -f $(docker container ls -aq)`
+
+### a useful command
+
+Launch a shell in a vm :
+`docker run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh`
