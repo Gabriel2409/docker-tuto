@@ -27,6 +27,22 @@ More details in the sections after
 - `--cpus 0.5` : limits to 0.5 cpu
 - `--memory 32m` : kills process after memory exceeded
 
+### Dockerfile main instructions
+
+- `FROM`: defines the base image whose filesystem we want to enrich
+- `ENV`: defines env variables
+- `RUN`: Runs a command, builds image fs
+- `COPY/ADD`: add resources from host machine to image file system
+- `EXPOSE`: exposes a port of the application
+- `HEALTHCHECK`: checks the health of application
+- `VOLUME`: defines a directory in the fs of the image whose content will be managed from outside the container
+- `WORKDIR`: defines the working directory
+- `USER`: defines the user used to launch the app
+- `ENTRYPOINT`: defines command executed when container is launched
+- `CMD`: defines default args that will be fed to the entrypoint
+
+Summary of discussion CMD vs ENTRYPOINT: https://stackoverflow.com/questions/21553353/what-is-the-difference-between-cmd-and-entrypoint-in-a-dockerfile
+
 ## Check installation works
 
 - `docker container run hello-world`
@@ -243,8 +259,130 @@ Dependencies -->  | /app/node_modules/express      Code --> | /app/*.js
 
 Note : for wsl, in the windows explorer go to : `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes`
 
-
 ## Copy on write
+
 - Mechanism that occurs when a container must modify a file in an underlying layer
 - At first, the file is copied from the image read only layer to the read-write layer of the container
 - Once the file is in the read/write layer, the modification can be made and be persistent
+
+## Dockerfile
+
+- Text file containing instructions to build the image file system
+- Standard flow
+  - Specification of image base
+  - Adding dependencies
+  - Add application code
+  - define launch command
+
+Example :
+
+```dockerfile
+# base image
+FROM node:8.11.1-alpine
+
+# copy dependencies
+COPY package.json /app/package.json
+
+# Install / compile dependencies
+RUN cd /app && npm install
+
+# Copy application code
+COPY . /app/
+
+# Expose HTTP port
+EXPOSE 80
+
+# Go to working directory
+WORKDIR /app
+
+# Command to execute on container start
+CMD ["npm", "start"]
+```
+
+### FROM
+
+- defines base image
+- different possibilities (OS, server, execution env)
+- `scratch` to build a minimal image which does not contain anything
+
+### ENV
+
+- defines env var
+- can be used inside the build
+- are available in the container environment
+
+### COPY / ADD
+
+- Copies files and folders in the image file system
+- Makes a new layer
+- `--chown` to specify ownership
+- `ADD` allows to specify a URL for source or unpack a tar.gz file
+- `COPY` is to be privileged because we have more control on how the copy is made
+
+### RUN
+
+- Executes a commad in a new layer
+- 2 formats:
+  - Shell : launched in a shell with "/bin/sh -c" by default
+  - Exec : not launched in a shell
+
+```dockerfile
+# Shell cmd
+RUN apt-get update -y && apt-get install
+
+# Not shell
+RUN ["/bin/bash", "-c", "echo hello"]
+```
+
+### EXPOSE
+
+- Informs of ports used by the app
+- can be modified at container launch with `-p`
+
+The `EXPOSE` instruction does not actually publish the port. It functions as a type of documentation between the person who builds the image and the person who runs the container, about which ports are intended to be published. To actually publish the port when running the container, use the -p flag on docker run to publish and map one or more ports, or the -P flag to publish all exposed ports and map them to high-order ports.
+
+### VOLUME
+
+- defines a directory whose data are decoupled from the container lifecycle
+- manages data outside of the union file-system
+- By default, creates a directory on host machine
+- volume is initialised with data in the image
+
+### USER
+
+- username or uid / gid used to launch the process of the container
+- allows to prevent container to be launched by root (root on container is also root on host machine)
+- used by instructions `RUN`, `CMD`, `ENTRYPOINT` following it
+- user can be changed at application launch
+
+### HEATHCHECK
+
+- checks the health status of container
+- ex : check health endpoint every 5 s
+
+```dockerfile
+FROM node:8.11-alpine
+RUN apk update && apk add curl
+HEALTHCHECK --interval=5x --timeout=3s --retries=3 CMD curl -f http://localhost:8000/health || exit 1
+...
+```
+
+A healthcheck can allow an orchestrator such as swarm to restart a container when needed
+
+### ENTRYPOINT / CMD
+
+- Defines the cmd executed by the container
+- `ENTRYPOINT`: binary of the application
+- `CMD`: defaults args
+- `ENTRYPOINT` and `CMD` are concatenated
+- 2 possible formats:
+  - shell, ex : `/bin/ping/localhost`
+  - exec, ex : `["ping", "localhost"]`
+
+## Build an image
+- `docker image build [OPTIONS] PATH | URL`
+
+Common options:
+- `-f` : specifies file to use (Dockerfile by default)
+- `--tag / -t` : specifies image name (`[registry/]user/repository:tag`)
+- `--label` : adds metadata
