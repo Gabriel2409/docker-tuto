@@ -13,6 +13,7 @@ More details in the sections after
 - `exec`: lauch a process in an existing container
 - `stop`: stops a container
 - `rm`: removes a container
+- `commit`: creates an image from the container
 
 ### docker run argument:
 
@@ -211,6 +212,14 @@ To delete all containers (running and stopped):
 
 - `docker container rm -f $(docker container ls -aq)`
 
+### commit
+
+Creates an image from the current container
+
+- `docker container commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]`
+
+Note that this approach is not recommended
+
 ### a useful command
 
 Launch a shell in a vm :
@@ -305,6 +314,8 @@ CMD ["npm", "start"]
 - different possibilities (OS, server, execution env)
 - `scratch` to build a minimal image which does not contain anything
 
+I can search the list of images here: https://hub.docker.com/search?type=image
+
 ### ENV
 
 - defines env var
@@ -379,10 +390,28 @@ A healthcheck can allow an orchestrator such as swarm to restart a container whe
   - shell, ex : `/bin/ping/localhost`
   - exec, ex : `["ping", "localhost"]`
 
+Notes :
+
+- shell format (ex: `ENTRYPOINT /usr/bin/node index.js`) : a command specified in this format will be executed via a shell in present in the image.
+- exec format (ex: `CMD ["node", "index.js"]`) : a command in this format does not require a shell in the image to work (more robust)
+
+ENTRYPOINT can be overwritten with --entrypoint :
+- `docker container run --entrypoint /bin/sh alpine`
+Note that passing multiple args is difficult
+
+To overwrite CMD we pass the command after the image name: 
+- `docker container run alpine echo "Hello"`
+
 ## Build an image
+
 - `docker image build [OPTIONS] PATH | URL`
 
 Common options:
+
 - `-f` : specifies file to use (Dockerfile by default)
 - `--tag / -t` : specifies image name (`[registry/]user/repository:tag`)
 - `--label` : adds metadata
+
+## List images
+- lists all images: `docker image ls`
+- lists all ping images: `docker image ls ping`
