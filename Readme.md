@@ -266,7 +266,7 @@ Dependencies -->  | /app/node_modules/express      Code --> | /app/*.js
 - Different storage drivers are used depending on the situation
 - The layers are stored in /var/lib/docker in the host machine (default install)
 
-Note : for wsl, in the windows explorer go to : `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes`
+Note : for wsl, in the windows explorer go to : `\\wsl$\docker-desktop-data\version-pack-data\community\docker`
 
 ## Copy on write
 
@@ -396,10 +396,12 @@ Notes :
 - exec format (ex: `CMD ["node", "index.js"]`) : a command in this format does not require a shell in the image to work (more robust)
 
 ENTRYPOINT can be overwritten with --entrypoint :
-- `docker container run --entrypoint /bin/sh alpine`
-Note that passing multiple args is difficult
 
-To overwrite CMD we pass the command after the image name: 
+- `docker container run --entrypoint /bin/sh alpine`
+  Note that passing multiple args is difficult
+
+To overwrite CMD we pass the command after the image name:
+
 - `docker container run alpine echo "Hello"`
 
 ## Build an image
@@ -413,5 +415,16 @@ Common options:
 - `--label` : adds metadata
 
 ## List images
+
 - lists all images: `docker image ls`
 - lists all ping images: `docker image ls ping`
+
+## Multistage build
+- 1st step : creates a base image which contains libraries
+- 2nd step : build production image from first image by only keeping relevant assets
+
+This can decrease the image size
+
+```dockerfile
+
+```
