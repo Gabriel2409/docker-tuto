@@ -15,7 +15,7 @@ More details in the sections after
 - `rm`: removes a container
 - `commit`: creates an image from the container
 
-### docker run argument:
+### docker container run argument:
 
 - `-t` : allocates pseudo TTY
 - `-i` : keep STDIN open (interactive)
@@ -480,3 +480,26 @@ RUN cd /app && npm i
 COPY . /app
 ...
 ```
+
+## Build context
+- When building an image, the content is packaged in a .tar and sent to the docker daemon.
+- a .dockerignore file can allow to easily exclude some files/folders
+
+The build context == all the files that go into the image
+
+Example of .dockerignore
+```dockerignore
+.git
+node_modules
+```
+
+## Basic docker image commands (details)
+
+### pull
+- Downloads an image from a registry (Docker Hub by default)
+- Each image layer is downloaded
+- Note that image is automatically downloaded when we create a container with an image that is not available locally
+- name format : USER/IMAGE:VERSION (default version is latest)
+-ex: `docker pull image alpine`
+
+### push
