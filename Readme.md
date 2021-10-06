@@ -425,6 +425,25 @@ Common options:
 
 This can decrease the image size
 
-```dockerfile
 
+```dockerfile
+# Monostage build : image size =  987MB
+FROM openjdk:10
+COPY . /usr/src/myapp
+WORKDIR /usr/src/myapp
+RUN javac Main.java
+CMD ["java", "Main"]
+```
+
+```dockerfile
+# Multistage build : image size = 295MB
+FROM openjdk:10 as build
+COPY . /usr/src/myapp
+WORKDIR /usr/src/myapp
+RUN javac Main.java
+
+FROM openjdk:10-jre-slim
+COPY --from=build /usr/src/myapp/Main.class /usr/src/myapp/
+WORKDIR /usr/src/myapp
+CMD ["java", "Main"]
 ```
