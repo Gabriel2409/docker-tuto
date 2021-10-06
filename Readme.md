@@ -447,3 +447,36 @@ COPY --from=build /usr/src/myapp/Main.class /usr/src/myapp/
 WORKDIR /usr/src/myapp
 CMD ["java", "Main"]
 ```
+
+## Cache
+Mechanism of reuse of created layers
+- increase image creation speed
+- ex: avoid recompiling dependencies when correcting a typo
+
+Cache invalidation : Forces creation of a new image
+- Modification of an instruction in the Dockerfile (ex: value of env var)
+- Modification of copied files in the image (ADD/COPY instructions)
+- If an instruction invalidates the cache, all the subsequent instructions won't use the cache
+
+When the image is built, you can see `=> CACHED` or `---> Using Cache`
+
+In the example below, each time i modify the source code, i have to run npm install again because cache is invalidated on line 2:
+
+```dockerfile
+FROM node:10.13-0:alpine
+COPY . /app/
+RUN cd /app && npm i
+EXPOSE 8080
+WORKDIR /app
+CMD ["npm", "start"]
+```
+
+To use cache to its fullest:
+```dockerfile
+FROM node:10.13-0:alpine
+COPY package.json /app/package.json
+RUN cd /app && npm i
+# cache will be invalidated at next step if i modify the source code
+COPY . /app
+...
+```
