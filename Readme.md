@@ -44,6 +44,17 @@ More details in the sections after
 
 Summary of discussion CMD vs ENTRYPOINT: https://stackoverflow.com/questions/21553353/what-is-the-difference-between-cmd-and-entrypoint-in-a-dockerfile
 
+### Basic docker container image commands: 
+- `pull` : gets image from registry
+`push`: push image to registry
+`inspect`: details of an image
+`history`: shows history of layers
+`ls`: shows local images
+`save`: saves an image to a .tar => `docker save -o file.tar image`
+`load`: loads image from .tar => `docker load < file.tar`
+`rm`: deletes image
+
+
 ## Check installation works
 
 - `docker container run hello-world`
@@ -420,11 +431,11 @@ Common options:
 - lists all ping images: `docker image ls ping`
 
 ## Multistage build
+
 - 1st step : creates a base image which contains libraries
 - 2nd step : build production image from first image by only keeping relevant assets
 
 This can decrease the image size
-
 
 ```dockerfile
 # Monostage build : image size =  987MB
@@ -449,11 +460,14 @@ CMD ["java", "Main"]
 ```
 
 ## Cache
+
 Mechanism of reuse of created layers
+
 - increase image creation speed
 - ex: avoid recompiling dependencies when correcting a typo
 
 Cache invalidation : Forces creation of a new image
+
 - Modification of an instruction in the Dockerfile (ex: value of env var)
 - Modification of copied files in the image (ADD/COPY instructions)
 - If an instruction invalidates the cache, all the subsequent instructions won't use the cache
@@ -472,6 +486,7 @@ CMD ["npm", "start"]
 ```
 
 To use cache to its fullest:
+
 ```dockerfile
 FROM node:10.13-0:alpine
 COPY package.json /app/package.json
@@ -482,12 +497,14 @@ COPY . /app
 ```
 
 ## Build context
+
 - When building an image, the content is packaged in a .tar and sent to the docker daemon.
 - a .dockerignore file can allow to easily exclude some files/folders
 
 The build context == all the files that go into the image
 
 Example of .dockerignore
+
 ```dockerignore
 .git
 node_modules
@@ -496,10 +513,50 @@ node_modules
 ## Basic docker image commands (details)
 
 ### pull
+
 - Downloads an image from a registry (Docker Hub by default)
 - Each image layer is downloaded
 - Note that image is automatically downloaded when we create a container with an image that is not available locally
 - name format : USER/IMAGE:VERSION (default version is latest)
--ex: `docker pull image alpine`
+- ex: `docker pull image alpine`
 
 ### push
+
+- uploads an image in a registry (docker hub by default)
+- Once uploaded, image can be used by all authorized users
+- Login is necessary : `docker login [OPTIONS] [SERVER]`
+
+### inspect
+
+- ex :`docker image inspect`
+- with format : `docker image inspect -f '{{ .Metadata }}' alpine`
+
+### history
+
+- shows how the image was created
+- shows the history of layers
+- ex : `docker image history portainer/portainer:latest`
+
+### ls
+
+- shows images created or downloaded
+- some of them are in the dangling state (not referenced anymore, can be suppressed)
+- Shows all images : `docker image ls`
+- Shows all images and temporary images : `docker image ls -a`
+- Shows only id : `docker image ls -q`
+- filter by name : `docker image ls node`
+- filter by dangling state: `docker image ls --filter dangling=true`
+- delete dangling images : `docker image prune`
+
+### save / load
+
+- exports or load an image from a tar file
+- ex : `docker save -o alpine.tar alpine` (`-o` is the same as `--output`)
+- ex: `docker load < alpine.tar`
+
+## rm
+
+- removes an image and its associated layers
+- ex : `docker image rm ubuntu`
+- deletes all images : `docker image rm $(docker image ls -q)`
+
