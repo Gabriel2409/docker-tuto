@@ -44,16 +44,16 @@ More details in the sections after
 
 Summary of discussion CMD vs ENTRYPOINT: https://stackoverflow.com/questions/21553353/what-is-the-difference-between-cmd-and-entrypoint-in-a-dockerfile
 
-### Basic docker container image commands: 
-- `pull` : gets image from registry
-`push`: push image to registry
-`inspect`: details of an image
-`history`: shows history of layers
-`ls`: shows local images
-`save`: saves an image to a .tar => `docker save -o file.tar image`
-`load`: loads image from .tar => `docker load < file.tar`
-`rm`: deletes image
+### Basic docker container image commands:
 
+- `pull` : gets image from registry
+  `push`: push image to registry
+  `inspect`: details of an image
+  `history`: shows history of layers
+  `ls`: shows local images
+  `save`: saves an image to a .tar => `docker save -o file.tar image`
+  `load`: loads image from .tar => `docker load < file.tar`
+  `rm`: deletes image
 
 ## Check installation works
 
@@ -553,10 +553,13 @@ node_modules
 - exports or load an image from a tar file
 - ex : `docker save -o alpine.tar alpine` (`-o` is the same as `--output`)
 - ex: `docker load < alpine.tar`
+- `tar -xvf apline.tar` shows all layers : each of them contains
+  - an archive (layer.tar)
+  - a json file
+  - a VERSION file
 
 ## rm
 
 - removes an image and its associated layers
 - ex : `docker image rm ubuntu`
 - deletes all images : `docker image rm $(docker image ls -q)`
-
