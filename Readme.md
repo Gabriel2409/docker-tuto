@@ -1,7 +1,7 @@
 
 Table of contents
 ====================
-@import "[TOC]" {cmd="toc" depthFrom=1 depthTo=2 orderedList=false}
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=2 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
@@ -33,6 +33,7 @@ Table of contents
 - [Storage](#storage)
 
 <!-- /code_chunk_output -->
+
 # Containers
 
 ## Cheat sheet
