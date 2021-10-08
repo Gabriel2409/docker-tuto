@@ -563,3 +563,70 @@ node_modules
 - removes an image and its associated layers
 - ex : `docker image rm ubuntu`
 - deletes all images : `docker image rm $(docker image ls -q)`
+
+# Registry
+
+## How to use
+
+- A registry is a library of docker images (place where all the images are saved)
+- Is is the "ship" part of the "Build Ship Run" workflow
+
+- get image with `docker image pull`
+- push image with `docker image push`
+
+## Providers:
+
+Docker
+
+- Docker Hub : https://hub.docker.com (official registry)
+- Docker Registry : open source solution
+- Docker Trusted Registry:
+  - commercial solution
+  - available with Docker-EE standard/advanced
+
+Others
+
+- Amazon EC2 container registry
+- Google Container Registry
+- Quay.io (CoreOS)
+- GitLab container registry
+
+## Docker Hub
+
+- Different images :
+  - official (https://hub.docker.com/expore)
+  - public / private : maintained by people/orgs
+- Integration with Github / Bitbucket
+- Integration in a CI/CD pipeline
+- Different version of docker (CE/EE)
+- Possibility to use several plugins
+
+Docker hub allows to analyse vulnerabilities on the images.
+
+Possibility to create a repo. The image name is `user/repository:version`
+
+To upload a local image to docker hub, we must add the correct prefix.
+
+- `docker image tag pong:1.3 gab24/pong:1.3`
+- then login : `docker login`
+- then push : `docker image push gab24/pong:1.3`
+
+We can then see the image in the hub
+
+## Docker Open source registry
+
+By default, a docker daemon can only communicate with a secure connection
+Exceptions:
+
+- localhost
+- pass `--insecure-registry` as an option (not recommended)
+- to push an image, the image name shoud be `HOST:PORT/NAME:PORT[:VERSION]`
+
+Example :
+
+- launch registry in a container : `docker container run -d -p 5000:5000 registry:2.6.2`
+- list images in the registry : `curl localhost:5000/v2/_catalog`. We get `{"repositories":[]}`
+- pull an image from docker hub: `docker image pull nginx:1.14`
+- tag it : `docker image tag nginx:1.14 localhost:5000/nginx:1.14`
+- push it : `docker image push localhost:5000/nginx:1.14`
+- list images in registry: `curl localhost:5000/v2/_catalog`: we get `{"repositories": ["nginx"]}`
