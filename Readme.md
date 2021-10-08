@@ -1,10 +1,10 @@
+# Table of contents
 
-Table of contents
-====================
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=2 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
+- [Table of contents](#table-of-contents)
 - [Containers](#containers)
   - [Cheat sheet](#cheat-sheet)
   - [Check installation works](#check-installation-works)
@@ -31,6 +31,8 @@ Table of contents
   - [Docker Hub](#docker-hub)
   - [Docker Open source registry](#docker-open-source-registry)
 - [Storage](#storage)
+  - [Containers and data persistence](#containers-and-data-persistence)
+  - [Volumes](#volumes)
 
 <!-- /code_chunk_output -->
 
@@ -669,4 +671,21 @@ Example :
 
 # Storage
 
+## Containers and data persistence
 
+- In a container, changes are saved to the layer in read/write
+- These changes are lost if the container is destroyed.
+- To be decoupled from container lifecycle, data must be handled outside of the filesystem
+
+## Volumes
+
+- files outside the union filesystem
+- created in different ways
+- `VOLUME` in the Dockerfile
+- options `-v` / `--mount` when creating a container
+- via cmd `docker volume create`
+
+Use cases :
+
+- data persistence in a database
+- logs persistance outside of container
