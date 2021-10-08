@@ -1,3 +1,38 @@
+
+Table of contents
+====================
+@import "[TOC]" {cmd="toc" depthFrom=1 depthTo=2 orderedList=false}
+
+<!-- code_chunk_output -->
+
+- [Containers](#containers)
+  - [Cheat sheet](#cheat-sheet)
+  - [Check installation works](#check-installation-works)
+  - [Useful commands](#useful-commands)
+  - [Publish port](#publish-port)
+  - [Bind mount](#bind-mount)
+  - [Limit resources](#limit-resources)
+  - [Ownership](#ownership)
+  - [Basic docker container commands (details)](#basic-docker-container-commands-details)
+- [Images](#images)
+  - [File system](#file-system)
+  - [Union filesystem](#union-filesystem)
+  - [Copy on write](#copy-on-write)
+  - [Dockerfile](#dockerfile)
+  - [Build an image](#build-an-image)
+  - [List images](#list-images)
+  - [Multistage build](#multistage-build)
+  - [Cache](#cache)
+  - [Build context](#build-context)
+  - [Basic docker image commands (details)](#basic-docker-image-commands-details)
+- [Registry](#registry)
+  - [How to use](#how-to-use)
+  - [Providers:](#providers)
+  - [Docker Hub](#docker-hub)
+  - [Docker Open source registry](#docker-open-source-registry)
+- [Storage](#storage)
+
+<!-- /code_chunk_output -->
 # Containers
 
 ## Cheat sheet
@@ -558,7 +593,7 @@ node_modules
   - a json file
   - a VERSION file
 
-## rm
+### rm
 
 - removes an image and its associated layers
 - ex : `docker image rm ubuntu`
@@ -630,3 +665,7 @@ Example :
 - tag it : `docker image tag nginx:1.14 localhost:5000/nginx:1.14`
 - push it : `docker image push localhost:5000/nginx:1.14`
 - list images in registry: `curl localhost:5000/v2/_catalog`: we get `{"repositories": ["nginx"]}`
+
+# Storage
+
+
