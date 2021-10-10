@@ -34,6 +34,8 @@
 - [Storage](#storage)
   - [Containers and data persistence](#containers-and-data-persistence)
   - [Volumes](#volumes)
+  - [Volume drivers](#volume-drivers)
+  - [Plugins](#plugins)
 
 <!-- /code_chunk_output -->
 
@@ -715,3 +717,34 @@ Example :
 To find the path of the volumes : `docker volume inspect -f '{{ .Mountpoint }}' db-data`
 Note that in wsl, i can not find the volume in `/var/lib/docker/volumes/db-data/_data`.
 Instead, in the file explorer, i go to `\\wsl$\docker-desktop-data\version-pack-data\community\docker`
+
+## Volume drivers
+
+- Volume drivers allow creation of volume on different types of storage
+- By default : "local":
+  - storage on host machine
+  - in `/var/lib/docker/volume/ID` (or `\\wsl$\docker-desktop-data\version-pack-data\community\docker\volumes/ID`)
+- Additional drivers can be installed via plugins
+  - can allow to use external storage (Ceph, AWS, GCE, Azure)
+
+## Plugins
+
+Note : plugins can be seen at https://hub.docker.com/search?type=plugin
+
+### sshfs
+
+Allows to store on a file system via ssh :
+
+- https://github.com/vieux/docker-volume-sshfs
+- example below is not production ready
+
+Using the plugin:
+
+- Install the plugin : `docker plugin install vieux/sshfs`
+
+- Check the plugin was enabled: `docker plugin ls -f enabled=true` (`-f` for `--filter`)
+
+- create a volume in the remote: `docker volume create -d vieux/sshfs -o sshcmd=<user>@<sshhost>:<sshpath> -o password=<password> <volumename>`
+- launch a container do map the volume : `docker container run -it -v <volumename>:<pathincontainer> alpine:3.8`
+
+In the container, if i create a file in `<pathincontainer>`, then it will be visible in the remote
