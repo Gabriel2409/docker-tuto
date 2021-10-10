@@ -36,6 +36,7 @@
   - [Volumes](#volumes)
   - [Volume drivers](#volume-drivers)
   - [Plugins](#plugins)
+- [Docker machine (DEPRECATED)](#docker-machine-deprecated)
 
 <!-- /code_chunk_output -->
 
@@ -748,3 +749,35 @@ Using the plugin:
 - launch a container do map the volume : `docker container run -it -v <volumename>:<pathincontainer> alpine:3.8`
 
 In the container, if i create a file in `<pathincontainer>`, then it will be visible in the remote
+
+# Docker machine (DEPRECATED)
+
+- Installs docker (client and daemon) either on physical machine or VM
+- allows local client to communicate with distant daemon
+- certificates are delivered at creation
+
+Use :
+
+- Local:
+  - Oracle Virtualbox
+  - VMWare
+- Cloud:
+  - DigitalOcean
+  - AWS
+  - Azure
+  - Google Compute Engine
+- Generique : used to create a machine on a vm or a physical machine
+
+On a local machine:
+
+- Client (docker) communicates with local daemon (dockerd) via socket /var/run/docker.sock
+
+We can also use docker machine with the `-d (or --driver)` option to create docker hosts (docker and dockerd) on a local machine or on a cloud provider :
+
+- `docker-machine create -d amazonec2 ...`
+- `docker-machine create -d google ...`
+- `docker-machine create -d virtualbox ...`
+
+Once we created a machine, it is possible to configure the client to address the distant daemon via a tcp socket (and not the local). To do so, we have to set some env variable. It can be done in a single command: `eval $(docker-machine env <machinename>)`
+
+..........
