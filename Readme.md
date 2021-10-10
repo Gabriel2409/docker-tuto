@@ -5,6 +5,7 @@
 <!-- code_chunk_output -->
 
 - [Table of contents](#table-of-contents)
+- [Docker - where is it on host ?](#docker-where-is-it-on-host)
 - [Containers](#containers)
   - [Cheat sheet](#cheat-sheet)
   - [Check installation works](#check-installation-works)
@@ -35,6 +36,11 @@
   - [Volumes](#volumes)
 
 <!-- /code_chunk_output -->
+
+# Docker - where is it on host ?
+
+- `/var/lib/docker` for linux
+- in wsl go to `\\wsl$\docker-desktop-data\version-pack-data\community\docker`
 
 # Containers
 
@@ -94,6 +100,14 @@ Summary of discussion CMD vs ENTRYPOINT: https://stackoverflow.com/questions/215
 - `save`: saves an image to a .tar => `docker save -o file.tar image`
 - `load`: loads image from .tar => `docker load < file.tar`
 - `rm`: deletes image
+
+### Basic docker volume commands:
+
+- `create` : creates a volume
+- `inspect`: inspects it
+- `ls`: lists volumes
+- `prune`: removes unused local volumes
+- `rm` : removes one or more volumes
 
 ## Check installation works
 
@@ -188,7 +202,7 @@ Note : set a soft limit with `--memory-reservation 16m`
 ### ls
 
 - `docker container ls`: sees all active containers
-(old version : `docker ps`)
+  (old version : `docker ps`)
 - `docker container ls -a`: sees all active and stopped containers
 - `docker container ls -q`: only get short id
 
@@ -409,6 +423,7 @@ The `EXPOSE` instruction does not actually publish the port. It functions as a t
 - manages data outside of the union file-system
 - By default, creates a directory on host machine
 - volume is initialised with data in the image
+- ex : `VOLUME ["/data"]` : content of the data folder will be saved to a volume (won't be deleted on container removal)
 
 ### USER
 
@@ -691,3 +706,12 @@ Use cases :
 
 - data persistence in a database
 - logs persistance outside of container
+
+Example :
+
+- create a volume named db-data : `docker volume create --name db-data`
+- launch mongo db and persist data in db-data volume : `docker container run -d --name db -v db-data:/data/db mongo:4.0`
+
+To find the path of the volumes : `docker volume inspect -f '{{ .Mountpoint }}' db-data`
+Note that in wsl, i can not find the volume in `/var/lib/docker/volumes/db-data/_data`.
+Instead, in the file explorer, i go to `\\wsl$\docker-desktop-data\version-pack-data\community\docker`
