@@ -53,6 +53,8 @@ More details in the sections after
 - `rm`: removes a container
 - `commit`: creates an image from the container
 
+Note : launch shell in vm : `docker run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh`
+
 ### docker container run argument:
 
 - `-t` : allocates pseudo TTY
@@ -85,13 +87,13 @@ Summary of discussion CMD vs ENTRYPOINT: https://stackoverflow.com/questions/215
 ### Basic docker container image commands:
 
 - `pull` : gets image from registry
-  `push`: push image to registry
-  `inspect`: details of an image
-  `history`: shows history of layers
-  `ls`: shows local images
-  `save`: saves an image to a .tar => `docker save -o file.tar image`
-  `load`: loads image from .tar => `docker load < file.tar`
-  `rm`: deletes image
+- `push`: push image to registry
+- `inspect`: details of an image
+- `history`: shows history of layers
+- `ls`: shows local images
+- `save`: saves an image to a .tar => `docker save -o file.tar image`
+- `load`: loads image from .tar => `docker load < file.tar`
+- `rm`: deletes image
 
 ## Check installation works
 
@@ -106,7 +108,7 @@ Summary of discussion CMD vs ENTRYPOINT: https://stackoverflow.com/questions/215
 - `-i` : keep STDIN open
   => `docker container run -ti ubuntu bash`
   (bash is the default if it is not specified)
-  To quit, the container : `exit`
+- To quit, the container : `exit`
 
 ### Foreground vs background
 
@@ -142,10 +144,10 @@ Mount a file or folder from the host machine inside the container
 - `docker container run -v HOST_PATH:CONTAINER_PATH ...`
 - OR `docker container run --mount type=bind,src=HOST_PATH,dst=CONTAINER_PATH ...`
 - ex: `docker container run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock portainer/portainer`
-  Portainer allows to supervise my docker host. It works because we bind the socket of the docker daemon and portainer can then access the api of the docker daemon via this socket
+- Note: Portainer allows to supervise my docker host. It works because we bind the socket of the docker daemon and portainer can then access the api of the docker daemon via this socket
 
--NOTE : be careful when mounting !!
-in the example below, we bind the root folder of our machine to the conainer and host folder of the container:
+NOTE : be careful when mounting !!
+In the example below, we bind the root folder of our machine to the conainer and host folder of the container:
 
 - `docker container run -v /:/host -ti alphine`
   Then in the container : -`# rm /host/bin/sh` -`# exit`
@@ -185,16 +187,16 @@ Note : set a soft limit with `--memory-reservation 16m`
 
 ### ls
 
-`docker container ls`: sees all active containers
+- `docker container ls`: sees all active containers
 (old version : `docker ps`)
-`docker container ls -a`: sees all active and stopped containers
-`docker container ls -q`: only get short id
+- `docker container ls -a`: sees all active and stopped containers
+- `docker container ls -q`: only get short id
 
 ### inspect
 
 - detailed view of a container : `docker inspect 6a082350011d` : we get a very detailed json of the container
 - only retrieves IP : `docker inspect --format '{{ .NetworkSettings.IPAddress }}' 6a082350011d`
-  -only retrieves state: `docker inspect --format '{{ json .State}}' 6a082350011d`
+- only retrieves state: `docker inspect --format '{{ json .State}}' 6a082350011d`
 
 ### logs
 
