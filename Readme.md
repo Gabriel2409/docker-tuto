@@ -37,6 +37,10 @@
   - [Volume drivers](#volume-drivers)
   - [Plugins](#plugins)
 - [Docker machine (DEPRECATED)](#docker-machine-deprecated)
+- [Docker compose](#docker-compose)
+  - [docker-compose.yml](#docker-composeyml)
+  - [docker-compose binary](#docker-compose-binary)
+  - [service discovery](#service-discovery)
 
 <!-- /code_chunk_output -->
 
@@ -781,3 +785,147 @@ We can also use docker machine with the `-d (or --driver)` option to create dock
 Once we created a machine, it is possible to configure the client to address the distant daemon via a tcp socket (and not the local). To do so, we have to set some env variable. It can be done in a single command: `eval $(docker-machine env <machinename>)`
 
 ..........
+
+# Docker compose
+
+- Good for a microservice architecture !
+- docker-compose.yml : defines all the services used in an app
+- docker-compose binary: allows to launch the app in docker-compose.yml
+
+## docker-compose.yml
+
+https://docs.docker.com/compose/
+
+Defines all elements of an app:
+
+- services
+- volumes
+- networks
+- secrets (only used by swarm)
+- configs (only used by swarm)
+
+Example :
+
+```yml
+version: '3.7' # compose file format
+volumes:
+  data: # volume data will be used by a service. By default we use a local driver
+networks: # definition of networks to isolate services
+  frontend:
+  backend:
+services: # definition of 3 services that makes the app
+  web:
+    image: org/web:2.3 # image used by the web service
+    networks:
+      - frontend # only accesse frontend network
+    ports:
+      - 80:80 # port mapping
+  api:
+    image: org/api:1.2
+    networks: # accesses both networks
+      - backend
+      - frontend
+  db:
+    image: mongo:4.0
+    volumes:
+      - data:/data/db # mounts data volume to /data/db
+    networks:
+      - backend
+# web and db can not commmunicate directly because they dont access the same network
+```
+
+Options for a service in docker compose :
+
+- image used : `image: <imagename>`
+- nb of replicas == nb of identical container launched for the service: `replicas <nb>`
+- ports published : `ports:`
+- Health check: `healthcheck:`
+- restart strategy: `restart:<strategy>`
+- swarm only: deployment constraints
+- swarm only: updates configs
+- swarm only: secrets used
+- swarm only: config used
+
+Note : build allows to specify a path to a dockerfile.
+
+```yml
+services:
+  web:
+    build: ./project # finds Dockerfile in project dir
+    ...
+  db:
+    build:
+      context: ./project/db # goes to project/db folder
+      dockerfile: Dockerfile-alternate # uses alternate dockerfile
+```
+
+## docker-compose binary
+
+- handles lifecycle of an application with Compose format
+- independant of the docker daemon but often shipped together
+- written in python
+
+NOTE : `docker compose` is a rewrite of `docker-compose` in Go
+
+Main commands:
+
+- `docker-compose up`: creates application
+  - use `-d` to detach
+- `docker-compose down`: removes application
+  - use `-v` to remove volumes
+- `docker-compose start <service>`: starts an existing container
+- `docker-compose stop <service>`: stops an existing container without removing it
+- `docker-compose build`: builds images of services (if build instruction is used)
+- `docker-compose pull`: Pulls images for services defined in a Compose file, but does not start the containers.
+- `docker-compose logs`: view output of containers
+- `docker-compose scale`: modifies number of container for a service
+- `docker-compose ps`: lists containers of the app
+
+## service discovery
+
+- use of docker daemon DNS to resolve services
+- a service communicates with another via his name
+
+ex : in a docker-compose.yml
+
+```yml
+services:
+  db: ...
+```
+
+In a node.js code file:
+
+```javascript
+// Mongodb connection string
+url = 'mongodb://db/todos'; // db is the name of the service
+```
+
+Note that docker compose allows to define dependencies between services but does not allow to know that a service is available before launching a service that depends on it.
+
+For example, if i have a web service that depends on a postgres service, in the dockerfile used to build the web service, i can add the following :
+
+```dockerfile
+# DockerFile
+COPY ./entrypoint.sh .
+RUN chmod +x /workdir/entrypoint.sh
+
+# run entrypoint.sh
+ENTRYPOINT ["/workdir/entrypoint.sh"]
+```
+
+where entrypoint.sh is:
+
+```sh
+#!/bin/sh
+echo "Waiting for postgres..."
+while ! nc -z db 5432; do
+  sleep 0.1
+done
+echo "PostgreSQL started"
+exec "$@"
+```
+
+Notes:
+
+- `nc -z`: Only scan for listening daemons, without sending any data to them.
+- `exec "$@"` basically takes any command line arguments passed to `entrypoint.sh` and execs them as a command
