@@ -41,6 +41,7 @@
   - [docker-compose.yml](#docker-composeyml)
   - [docker-compose binary](#docker-compose-binary)
   - [service discovery](#service-discovery)
+  - [Voting app](#voting-app)
 
 <!-- /code_chunk_output -->
 
@@ -841,6 +842,7 @@ Options for a service in docker compose :
 - ports published : `ports:`
 - Health check: `healthcheck:`
 - restart strategy: `restart:<strategy>`
+- redefines container command : `command: <command>`
 - swarm only: deployment constraints
 - swarm only: updates configs
 - swarm only: secrets used
@@ -929,3 +931,21 @@ Notes:
 
 - `nc -z`: Only scan for listening daemons, without sending any data to them.
 - `exec "$@"` basically takes any command line arguments passed to `entrypoint.sh` and execs them as a command
+
+## Voting app
+
+- https://github.com/dockersamples/example-voting-app
+- Open source application maintained by docker
+- 5 services:
+  - 3 languages: Node.js / python / .NET
+  - Two databases: Redis / Postgres
+
+
+
+```
+voting-app (python) -> redis -> worker (.NET) -> postgres -> result-app (Node.jss)
+```
+A user votes via web interface -> vote is stored in redis -> the worker gets the vote in redis and saves it in postgres -> users can see the result on another web interface
+
+- The repo contains a lot of different docker-compose files : we will look in detail at docker-compose-simple.yml (used for development)
+=> `docker-compose -f docker-compose-simple.yml up -d`
