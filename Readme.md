@@ -42,6 +42,10 @@
   - [docker-compose binary](#docker-compose-binary)
   - [service discovery](#service-discovery)
   - [Voting app](#voting-app)
+- [Docker Swarm](#docker-swarm)
+  - [Swarm mode](#swarm-mode)
+  - [Raft: consensus in swarm mode](#raft-consensus-in-swarm-mode)
+  - [Node](#node)
 
 <!-- /code_chunk_output -->
 
@@ -940,12 +944,68 @@ Notes:
   - 3 languages: Node.js / python / .NET
   - Two databases: Redis / Postgres
 
-
-
 ```
 voting-app (python) -> redis -> worker (.NET) -> postgres -> result-app (Node.jss)
 ```
+
 A user votes via web interface -> vote is stored in redis -> the worker gets the vote in redis and saves it in postgres -> users can see the result on another web interface
 
 - The repo contains a lot of different docker-compose files : we will look in detail at docker-compose-simple.yml (used for development)
-=> `docker-compose -f docker-compose-simple.yml up -d`
+  => `docker-compose -f docker-compose-simple.yml up -d`
+
+# Docker Swarm
+
+Since v1.12:
+
+- orchestration is integrated to docker daemon
+- easy to setup
+- secure by default
+- usable in dev environment
+
+## Swarm mode
+
+Typical workflow:
+
+- define an app with docker compose format
+- deploy it in the cluster
+
+Swarm mode : primitives
+
+- Node = machine member of a swarm cluster
+  - Managers: manage the cluster
+  - Workers: run the containers of the app
+- Service = allows to specify the way we want to launch the containers of the app
+- Stack = group of service
+- Secret = sensitive data
+- Config = config of the app
+
+Using a swarm is easy:
+
+- create a swarm : `docker swarm init`
+- add a node: `docker swarm joing`
+
+## Raft: consensus in swarm mode
+
+- Consensus involves multiple servers agreeing on values
+- Swarm uses raft. An animation explaining it can be found here: http://thesecretlivesofdata.com/raft/
+
+## Node
+
+- Machine which is part of the swarm and where docker daemon is running
+- Types:
+  - Manager:
+    - schedules and orchestrate containers
+    - manages cluster state
+    - uses RAFT consensus algorithm
+    - also a worker by default
+  - Worker:
+    - executes containers
+- Several possible states:
+  - Active: the scheduler can assign tasks to the node
+  - Pause:
+    - the scheduler can not assign tasks to the nod
+    - currently running tasks remain unchanged
+  - Drain:
+    - the scheduler can not assign tasks to the nod
+    - the running tasks on the node are stopped and launched on other nodes
+- access node api : `docker node --help`
